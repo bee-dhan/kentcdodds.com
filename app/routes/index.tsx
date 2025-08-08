@@ -32,6 +32,7 @@ import {
 } from '#app/utils/misc.tsx'
 import { getUser } from '#app/utils/session.server.ts'
 import { getServerTimeHeader } from '#app/utils/timing.server.ts'
+import { Link } from '@remix-run/react'
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const timings = {}
@@ -125,6 +126,9 @@ export default function IndexRoute() {
 				<DiscordSection />
 				<Spacer size="lg" />
 				<AboutSection />
+				<div className="mt-8">
+					<Link to="/workspaces" className="underline">Try the textbook workspace generator →</Link>
+				</div>
 			</main>
 		</div>
 	)
