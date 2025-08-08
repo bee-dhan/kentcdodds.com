@@ -31,6 +31,7 @@ model User {
   calls     Call[]
   sessions  Session[]
   postReads PostRead[]
+  workspaces Workspace[]
 
   @@index([team])
 }
@@ -84,4 +85,53 @@ model Passkey {
   transports     String? // Stored as comma-separated values
 
   @@index(userId)
+}
+
+model Workspace {
+  id        String      @id @default(uuid())
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  title     String
+  owner     User?       @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  ownerId   String?
+  sources   SourceDocument[]
+  chapters  ChapterPage[]
+
+  @@index([ownerId])
+}
+
+model SourceDocument {
+  id          String    @id @default(uuid())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  title       String
+  type        String    // e.g. 'PDF', 'URL', 'AUDIO'
+  filePath    String?   // local filesystem path if stored locally
+  url         String?   // original URL if any
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId String
+  chapters    ChapterPage[]
+
+  @@index([workspaceId])
+}
+
+model ChapterPage {
+  id            String         @id @default(uuid())
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  title         String
+  order         Int
+  summary       String
+  keyConcepts   String         // JSON stringified array of concepts
+  studyQuestions String        // JSON stringified array of questions
+  pageStart     Int?
+  pageEnd       Int?
+  workspace     Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId   String
+  source        SourceDocument? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  sourceId      String?
+
+  @@index([workspaceId])
+  @@index([sourceId])
+  @@unique([workspaceId, order])
 }
